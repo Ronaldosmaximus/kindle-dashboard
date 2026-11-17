@@ -4,6 +4,7 @@ import json
 import math
 import os
 import sys
+import time
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -40,9 +41,15 @@ def wetter_laden():
         "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max",
         "forecast_days": 3,
     }
-    r = requests.get(url, params=params, timeout=30)
-    r.raise_for_status()
-    return r.json()
+    for versuch in range(4):
+        try:
+            r = requests.get(url, params=params, timeout=60)
+            r.raise_for_status()
+            return r.json()
+        except requests.RequestException:
+            if versuch == 3:
+                raise
+            time.sleep(15)
 
 
 def trainings_laden(quelle, heute, anzahl=2):
